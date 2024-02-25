@@ -65,8 +65,9 @@ app.post("/register", async (req, res) => {
 //get my recipes
 app.post("/myrecipes", async (req, res) => {
   const { uid } = req.body;
-  const recipes = await Recipe.find({ userId: uid });
+  const recipes = await Recipe.find();
   res.status(200).json({ recipes: recipes });
+  // console.log("recipes here - ", recipes);
 });
 app.post("/recipe", async (req, res) => {
   const { id } = req.body;
@@ -86,6 +87,17 @@ app.post("/recipe", async (req, res) => {
       });
   } catch (err) {
     console.log(err);
+  }
+});
+// get all recipe
+app.get("/allrecipes", async (req, res) => {
+  try {
+    const recipes = await Recipe.find();
+    res.status(200).json({ recipes });
+    console.log(recipes);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error", error });
+    console.log(error);
   }
 });
 //add Image to DB
@@ -163,17 +175,21 @@ app.post("/editRecipe", async (req, res) => {
 });
 
 app.post("/fetchList", async (req, res) => {
-  const list = await Recipe.find({
-    $text: { $search: req.body.search },
-  })
-    .then((list) => {
-      console.log(list);
-      res.status(200).json(list);
-    })
-    .catch((err) => {
-      res.status(500).json({ message: "Internal server error", err });
+  try {
+    const list = await Recipe.find({
+      name: { $regex: new RegExp(req.body.search, "i") }, // Case-insensitive search
     });
+
+    // console.log(list);
+    res.status(200).json(list);
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: err.message });
+  }
 });
+
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });
