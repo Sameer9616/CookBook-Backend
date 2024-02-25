@@ -15,6 +15,9 @@ app.use(cors());
 app.get("/", (req, res) => {
   res.send("CookBook Backend");
 });
+app.get("/health", (req, res) => {
+  res.send("OK");
+});
 //auth
 app.post("/auth", (req, res) => {
   const { email, password } = req.body;
